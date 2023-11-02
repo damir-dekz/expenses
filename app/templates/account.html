@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Личный кабинет</h1>
+<h1 style="color: red">НУРИК ЛОХ ХАХАХА</h1>
 <p>Добро пожаловать, {{ user.first_name }}!</p>
 <p>Ваш email: {{ user.email }}</p>
 <p><a href="/logout">Выйти</a></p>
@@ -28,6 +28,7 @@
     <thead>
         <tr>
             <th>id</th>
+            <th>Дата</th>
             <th>Описание</th>
             <th>Сумма</th>
             <th>Операции</th>
@@ -37,6 +38,7 @@
     {% for transaction in transactions %}
         <tr>
             <td>{{ transaction.id }}</td>
+            <td>{{ transaction.created }}</td>
             <td>{{ transaction.description }}</td>
             <td style="color:
                     {% if transaction.amount < 0 %}

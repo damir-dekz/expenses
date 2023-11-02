@@ -18,7 +18,7 @@ def account(request):
     if not user.is_authenticated:
         return redirect("/")
 
-    transactions = Transaction.objects.filter(user=user)
+    transactions = Transaction.objects.filter(user=user).order_by("-id")
 
     paginator = Paginator(transactions, 10)
 
