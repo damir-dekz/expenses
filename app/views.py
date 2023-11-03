@@ -5,6 +5,12 @@ from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from app.models import Transaction
 from django.db.models import Sum, Avg
+import matplotlib
+import matplotlib.pyplot as plt
+
+from expenses import settings
+
+matplotlib.use("agg")
 
 
 def index(request):
@@ -18,6 +24,8 @@ def account(request, transaction_type=""):
     user = request.user
     if not user.is_authenticated:
         return redirect("/")
+
+    report = ""
 
     search = request.GET.get("search", "")
     message = request.GET.get("message", "")
@@ -34,6 +42,10 @@ def account(request, transaction_type=""):
 
     if transaction_type == "incomes":
         transactions = transactions.filter(amount__gt=0)
+
+    if transaction_type == "report":
+        filename = f"{user.id}_report.png"
+        report = f"/media/{filename}"
 
     total = transactions.aggregate(Sum("amount"))["amount__sum"]
     if total is None:
@@ -53,7 +65,12 @@ def account(request, transaction_type=""):
     page_obj = paginator.get_page(page)
     transactions = page_obj.object_list
 
-    return render(request, 'account.html', {
+    html_file = 'account.html'
+
+    if request.GET.get("ajax", "") == "1":
+        html_file = "table.html"
+
+    return render(request, html_file, {
         "user": user,
         "transactions": transactions,
         "number_of_pages": paginator.num_pages,
@@ -68,6 +85,7 @@ def account(request, transaction_type=""):
         "total": total,
         "avg": avg,
         "message": message,
+        "report": report
     })
 
 

@@ -15,11 +15,14 @@
       <li class="nav-item">
         <a class="nav-link {% if transaction_type == 'incomes' %}active{% endif %}"
            href="/account/incomes?search={{ search }}">Доходы</a>
+      <li class="nav-item">
+        <a class="nav-link {% if transaction_type == 'incomes' %}active{% endif %}"
+           href="/account/report?search={{ search }}">Отчет</a>
       </li>
     </ul>
     <form method="get">
     <div class="mb-3">
-      <input name="search" type="text"
+      <input name="search" type="text" onchange="load_page(page_no)" onkeyup="load_page(page_no)"
              class="form-control" id="search" placeholder="Поиск..."
              value="{{ search }}"
              autofocus
@@ -27,7 +30,8 @@
     </div>
     </form>
     
-    {% include 'table.html' %}
+    <div id="ajax"></div>
+
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
       Добавить
     </button>
@@ -42,7 +46,23 @@
                 window.location = url;
             }
         }
+        const load_page = async (page) => {
+            page_no = page;
+            const search = document.getElementById("search").value;
+            const url = `/account/{{ transaction_type }}?search=${search}&page=${page}&ajax=1`;
+            const response = fetch(url);
+            const text = await (await response).text();
+            const status = await (await response).status;
+            if (status !== 200) {
+                document.getElementById("ajax").innerHTML = "Ошибка";
+                return;
+            }
+            document.getElementById("ajax").innerHTML = text;
+        }
+        let page_no = {{ current_page }};
+        load_page(page_no);
     </script>
+
 
 {% include "create.html" %}
 
