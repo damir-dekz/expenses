@@ -19,8 +19,8 @@
                 <div class="mb-3">
                   <label for="type" class="form-label">Тип</label>
                     <select name="type" id="type" class="form-control">
-                        <option value="expense">Расход</option>
-                        <option value="income">Доход</option>
+                        <option value="expense" {% if transaction_type == 'expenses' %}selected{% endif %}>Расход</option>
+                        <option value="income" {% if transaction_type == 'incomes' %}selected{% endif %}>Доход</option>
                     </select>
                 </div>
             </div>

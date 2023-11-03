@@ -4,6 +4,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from app.models import Transaction
+from django.db.models import Sum, Avg
 
 
 def index(request):
@@ -13,14 +14,31 @@ def index(request):
         return render(request, 'index.html')
 
 
-def account(request):
+def account(request, transaction_type=""):
     user = request.user
     if not user.is_authenticated:
         return redirect("/")
 
+    search = request.GET.get("search", "")
+    message = request.GET.get("message", "")
+    if message == 'insufficient':
+        message = 'Недостаточно средств'
+
     transactions = Transaction.objects.filter(user=user).order_by("-id")
 
-    paginator = Paginator(transactions, 10)
+    if search != "":
+        transactions = transactions.filter(description__icontains=search)
+
+    if transaction_type == "expenses":
+        transactions = transactions.filter(amount__lt=0)
+
+    if transaction_type == "incomes":
+        transactions = transactions.filter(amount__gt=0)
+
+    total = transactions.aggregate(Sum("amount"))["amount__sum"]
+    avg = transactions.aggregate(Avg("amount"))["amount__avg"]
+
+    paginator = Paginator(transactions, 8)
 
     page = 1
     if request.GET.get("page"):
@@ -39,6 +57,11 @@ def account(request):
         "has_previous": page_obj.has_previous(),
         "previous_page": page - 1,
         "next_page": page + 1,
+        "search": search,
+        "transaction_type": transaction_type,
+        "total": total,
+        "avg": avg,
+        "message": message,
     })
 
 
@@ -49,6 +72,9 @@ def create_view(request):
 
     if request.method == "POST":
         if request.POST.get("type", "") == "expense":
+            total = Transaction.objects.aggregate(Sum("amount"))["amount__sum"]
+            if total < abs(int(request.POST.get("amount", 0))):
+                return redirect("/account/?message=insufficient")
             Transaction.objects.create(
                 user=user,
                 description=request.POST.get("description", ""),

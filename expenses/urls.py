@@ -29,6 +29,7 @@ urlpatterns = [
     path('login/', views_auth.login_view, name='login'),
     path('logout/', views_auth.logout_view, name='logout'),
     path('account/', views.account, name='account'),
+    path('account/<str:transaction_type>', views.account, name='account_filtered'),
     path('create/', views.create_view, name='create'),
     path('delete/<int:transaction_id>', views.delete_view, name='create'),
     path('edit/<int:transaction_id>', views.edit_view, name='edit'),
