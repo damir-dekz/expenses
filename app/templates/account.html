@@ -2,7 +2,6 @@
 {% block content %}
 <h1>Личный кабинет</h1>
 <p>Добро пожаловать, {{ user.first_name }}! Ваш email: {{ user.email }} (<a href="/logout">Выйти</a>)</p>
-<p><a href="/logout">Выйти</a></p>
 <h2>Менеджер расходов</h2>
     <ul class="nav nav-tabs">
       <li class="nav-item">
@@ -27,70 +26,8 @@
       >
     </div>
     </form>
-    <nav>
-      <ul class="pagination">
-        <li class="page-item {% if not has_previous %}disabled{% endif %}">
-          <a class="page-link" href="?page={{ previous_page }}&search={{ search }}" aria-label="Назад">
-            <span aria-hidden="true">&laquo;</span>
-          </a>
-        </li>
-          {% for page in pages %}
-              <li class="page-item {% if page == current_page %}active{% endif %}"><a class="page-link" href="?page={{ page }}&search={{ search }}">{{ page }}</a></li>
-          {% endfor %}
-        <li class="page-item {% if not has_next %}disabled{% endif %}">
-          <a class="page-link" href="?page={{ next_page }}&search={{ search }}" aria-label="Вперед">
-            <span aria-hidden="true">&raquo;</span>
-          </a>
-        </li>
-      </ul>
-    </nav>
-    <h4>Транзакции</h4>
-    <p class="alert-danger text-danger">{{ message }}</p>
-    <table class="table table-hover">
-    <thead>
-        <tr>
-            <th>id</th>
-            <th>Дата</th>
-            <th>Описание</th>
-            <th>Сумма</th>
-            <th>Операции</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for transaction in transactions %}
-        <tr>
-            <td>{{ transaction.id }}</td>
-            <td>{{ transaction.created }}</td>
-            <td>{{ transaction.description }}</td>
-            <td style="color:
-                    {% if transaction.amount < 0 %}
-                    red
-                    {% else %}
-                    darkgreen
-                    {% endif %}
-                    ">
-                {{ transaction.amount }} KZT
-            </td>
-            <td>
-                <button class="btn btn-sm btn-danger" onclick="delete_transaction({{ transaction.id }})">удалить</button>
-                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modal_edit_{{ transaction.id }}">ред</button>
-            </td>
-        </tr>
-    {% endfor %}
-        <tr>
-            <td></td>
-            <td colspan="2">Итого</td>
-            <td colspan="2">{{ total }}</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td colspan="2">Среднее</td>
-            <td colspan="2">{{ avg }}</td>
-        </tr>
-
-    </tbody>
-    </table>
-
+    
+    {% include 'table.html' %}
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
       Добавить
     </button>

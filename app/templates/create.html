@@ -5,7 +5,7 @@
         <h1 class="modal-title fs-5" id="exampleModalLabel">Добавить запись</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-        <form action="/create/" method="post" style="max-width: 800px">
+        <form action="/create/" enctype="multipart/form-data" method="post" style="max-width: 800px">
           <div class="modal-body">
                 {% csrf_token %}
                 <div class="mb-3">
@@ -15,6 +15,10 @@
                 <div class="mb-3">
                   <label for="amount" class="form-label">Сумма</label>
                   <input name="amount" type="number" class="form-control" id="amount">
+                </div>
+                 <div class="mb-3">
+                  <label for="evidence" class="form-label">Файл</label>
+                  <input name="evidence" type="file" class="form-control" id="evidence">
                 </div>
                 <div class="mb-3">
                   <label for="type" class="form-label">Тип</label>

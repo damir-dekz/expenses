@@ -36,7 +36,13 @@ def account(request, transaction_type=""):
         transactions = transactions.filter(amount__gt=0)
 
     total = transactions.aggregate(Sum("amount"))["amount__sum"]
-    avg = transactions.aggregate(Avg("amount"))["amount__avg"]
+    if total is None:
+        total = 0
+    agg_avg = transactions.aggregate(Avg("amount"))["amount__avg"]
+    if agg_avg is not None:
+        avg = round(agg_avg)
+    else:
+        avg = 0
 
     paginator = Paginator(transactions, 8)
 
@@ -71,21 +77,29 @@ def create_view(request):
         return redirect("/")
 
     if request.method == "POST":
+        transaction = None
         if request.POST.get("type", "") == "expense":
-            total = Transaction.objects.aggregate(Sum("amount"))["amount__sum"]
+            total = Transaction.objects.filter(user=user).aggregate(Sum("amount"))["amount__sum"]
+            if total is None:
+                total = 0
             if total < abs(int(request.POST.get("amount", 0))):
                 return redirect("/account/?message=insufficient")
-            Transaction.objects.create(
+            transaction = Transaction.objects.create(
                 user=user,
                 description=request.POST.get("description", ""),
                 amount=-abs(int(request.POST.get("amount", 0))),
             )
         if request.POST.get("type", "") == "income":
-            Transaction.objects.create(
+            transaction = Transaction.objects.create(
                 user=user,
                 description=request.POST.get("description", ""),
                 amount=abs(int(request.POST.get("amount", 0))),
             )
+
+        if transaction is not None:
+            if request.FILES.get("evidence", None):
+                transaction.evidence = request.FILES["evidence"]
+                transaction.save()
         return redirect("/")
 
     raise NotImplementedError
@@ -105,6 +119,9 @@ def edit_view(request: HttpRequest, transaction_id: int) -> HttpResponse:
             transaction.amount = -abs(int(request.POST.get("amount", 0)))
         if request.POST.get("type", "") == "income":
             transaction.amount = abs(int(request.POST.get("amount", 0)))
+        if transaction is not None:
+            if request.FILES.get("evidence", None):
+                transaction.evidence = request.FILES["evidence"]
         transaction.save()
         return redirect("/")
 
